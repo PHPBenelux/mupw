@@ -1,0 +1,52 @@
+body {
+    background-color: gainsboro;
+    font-family: 'Righteous', cursive;
+    font-size: larger;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: navy;
+}
+a:hover {
+    color: lightskyblue;
+}
+
+.profileLink {
+    display: block;
+    width: 115px;
+    height: 115px;
+    background: white;
+}
+
+.hide {
+    background: black;
+}
+
+#winner {
+    background: lightgreen;
+    padding: 5px 25px;
+    text-align: center;
+}
+
+div#wrapper {
+    max-width: 650px;
+    margin: 20px auto;
+}
+
+ul.list {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul.list li.element {
+    width: 100px;
+    float: left;
+    margin: 10px;
+}
+
+.clear {
+    font-size: 0;
+    clear: both;
+}
