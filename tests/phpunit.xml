@@ -1,17 +1,32 @@
-<phpunit bootstrap="./bootstrap.php">
-    <testsuite name="Application Test Suite">
+<phpunit
+    bootstrap="./bootstrap.php"
+    colors="true"
+    stopOnFailure="true"
+    syntaxCheck="true">
+    <testsuite name="PHPBenelux Raffle Tests">
         <directory>./application</directory>
     </testsuite>
-    <testsuite name="Library Test Suite">
-        <directory>./library</directory>
-    </testsuite>
-    
+
     <filter>
-        <!-- If Zend Framework is inside your project's library, uncomment this filter -->
-        <!-- 
         <whitelist>
-            <directory suffix=".php">../../library/Zend</directory>
+            <directory suffix=".php">../application</directory>
+            <exclude>
+                <directory suffix=".phtml">../application</directory>
+            </exclude>
         </whitelist>
-        -->
     </filter>
+
+    <logging>
+        <log
+            type="coverage-html"
+            target="./build/coverage"
+            charset="UTF-8"
+            yui="true"
+            highlight="true"
+            lowUpperBound="35"
+            highLowerBound="70"/>
+        <log type="coverage-xml" target="./build/logs/coverage.xml"/>
+        <log type="coverage-clover" target="./build/logs/clover.xml"/>
+        <log type="junit" target="./build/logs/junit.xml" logIncompleteSkipped="false"/>
+    </logging>
 </phpunit>

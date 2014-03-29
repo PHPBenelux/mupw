@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="PHPBenelux Builder" default="build" description="Providing QA on PHPBenelux code base">
+
+    <target name="prepare" description="Prepares our environment">
+        <delete dir="${project.basedir}/build" quiet="true"/>
+        <mkdir dir="${project.basedir}/build" mode="0775"/>
+        <mkdir dir="${project.basedir}/build/logs" mode="0775"/>
+        <mkdir dir="${project.basedir}/build/coverage" mode="0775"/>
+        <mkdir dir="${project.basedir}/build/pdepend" mode="0775"/>
+    </target>
+
+    <fileset id="application" dir="${project.basedir}/../">
+        <include name="library/BAS/Shared/Model/*.php"/>
+        <include name="library/BAS/Shared/Model/**/*.php"/>
+        <include name="service/application/**/*.php"/>
+        <exclude name="service/application/tcpdf/*"/>
+    </fileset>
+
+    <target name="phplint" description="Check PHP syntax">
+        <phplint>
+            <fileset refid="application"/>
+        </phplint>
+    </target>
+
+    <target name="jsllint" description="Check javascript syntax">
+        <jsllint
+            executable="/usr/bin/jsl"
+            tofile="${project.basedir}/build/logs/jslint.txt"
+            cachefile="${project.basedir}/build/logs/jslint.cache">
+            <fileset dir="${project.basedir}/../">
+                <include name="extranet/application/vbd/public/js/*.js"/>
+                <exclude name="extranet/application/vbd/public/js/*.min.js"/>
+            </fileset>
+        </jsllint>
+    </target>
+
+    <target name="phpunit" description="Run unit tests">
+        <exec
+            command="/usr/bin/phpunit"
+            passthru="true"
+            dir="${project.basedir}"
+            checkreturn="true"/>
+    </target>
+
+    <target name="phpunit-selenium" description="Run unit tests">
+        <exec
+            command="/usr/bin/phpunit --configuration phpunit-selenium.xml"
+            passthru="true"
+            dir="${project.basedir}"
+            checkreturn="true"/>
+    </target>
+
+    <target name="pdepend" description="Run Dependency Metrics">
+        <phpdepend haltonerror="true">
+            <fileset refid="application"/>
+            <logger type="jdepend-xml" outfile="build/logs/jdepend.xml"/>
+            <logger type="jdepend-chart" outfile="build/pdepend/jdepend.svg"/>
+            <logger type="overview-pyramid" outfile="build/pdepend/pyramid.svg"/>
+            <analyzer type="coderank-mode" value="method"/>
+        </phpdepend>
+    </target>
+
+    <target name="phpmd" description="Run PHP Mess Detection">
+        <phpmd>
+            <fileset refid="application"/>
+            <formatter type="xml" outfile="build/logs/pmd.xml"/>
+        </phpmd>
+    </target>
+
+    <target name="phpcpd" description="Run Copy/paste Detection">
+        <phpcpd>
+            <fileset refid="application"/>
+            <formatter type="pmd" outfile="build/logs/pmd-cpd.xml"/>
+        </phpcpd>
+    </target>
+
+    <target name="phploc" description="Run PHP LOC">
+        <exec
+            command="/usr/bin/phploc --log-xml build/logs/phploc.xml --count-tests --suffixes php ../library/BAS"
+            passthru="true"
+            dir="${project.basedir}"
+            checkreturn="true"/>
+    </target>
+
+    <target name="phpcs" description="Run PHP Code Sniffer">
+        <property name="sniffs" value="Zend_Sniffs_Files_ClosingTagSniff,Zend_Sniffs_Debug_CodeAnalyzerSniff,Zend_Sniffs_NamingConventions_ValidVariableNameSniff,Generic_Sniffs_Functions_FunctionCallArgumentSpacingSniff,Generic_Sniffs_Functions_OpeningFunctionBraceBsdAllmanSniff,Generic_Sniffs_PHP_DisallowShortOpenTagSniff,Generic_Sniffs_WhiteSpace_DisallowTabIndentSniff,PEAR_Sniffs_Classes_ClassDeclarationSniff,PEAR_Sniffs_ControlStructures_ControlSignatureSniff,PEAR_Sniffs_Functions_FunctionCallSignatureSniff,PEAR_Sniffs_Functions_ValidDefaultValueSniff,PEAR_Sniffs_WhiteSpace_ScopeClosingBraceSniff,Squiz_Sniffs_Functions_GlobalFunctionSniff,Generic_Sniffs_Files_LineEndingsSniff"/>
+        <phpcodesniffer
+                standard="Zend"
+                showSniffs="true"
+                showWarnings="true"
+                haltonerror="false"
+                haltonwarning="false"
+                skipversioncheck="true"
+		        sniffs="${sniffs}"
+                verbosity="1">
+            <fileset refid="application"/>
+            <formatter type="checkstyle" outfile="build/logs/checkstyle.xml"/>
+        </phpcodesniffer>
+    </target>
+
+    <target name="build" description="Test, measure and deploy">
+        <phingcall target="prepare"/>
+        <if>
+            <not><equals arg1="${host.name}" arg2="vagrant-debian"/></not>
+            <then>
+                <phingcall target="phplint"/>
+                <phingcall target="jsllint"/>
+            </then>
+        </if>
+        <phingcall target="phpunit"/>
+        <if>
+            <not><equals arg1="${host.name}" arg2="vagrant-debian"/></not>
+            <then>
+                <phingcall target="phpcs"/>
+                <phingcall target="pdepend"/>
+                <phingcall target="phpmd"/>
+                <phingcall target="phpcpd"/>
+                <phingcall target="phploc"/>
+            </then>
+        </if>
+    </target>
+
+</project>

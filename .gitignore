@@ -1,3 +1,4 @@
 .idea
 application/configs/api.ini
 application/configs/local.ini
+tests/build
