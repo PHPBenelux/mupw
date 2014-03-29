@@ -16,12 +16,12 @@
     <div id="header">
         <p><img id="hacking" src="/images/hack_laptop.png" width="250" height="" alt="hack"
                 align="right"/>Welcome to the PHPBenelux Meetup Raffle. If you haven't registered on the
-            <a href="https://www.meetup.com/events/<?php echo $this->eventId ?>"
+            <a href="https://www.meetup.com/events/<?php echo $this->escape($this->eventId) ?>"
                title="Registration for the PHPBenelux meetup on meetup.com">event page</a>,
             you're missing out on winning an awesome prize.</p>
     </div><!-- end header -->
 
-    <h2>Current participants (<?php echo count($this->response) ?>)</h2>
+    <h2>Current participants (<?php echo count($this->collection) ?>)</h2>
 
     <div id="winner">
         <div style="text-align: center;"><h2>And the winner is...</h2></div>
@@ -31,12 +31,12 @@
 
     <div id="participants">
         <ul class="list">
-            <?php foreach ($this->response as $member): ?>
-                <?php if ('yes' === $member->response): ?>
+            <?php foreach ($this->collection as $member): ?>
+                <?php if ('yes' === $member->getResponse()): ?>
                 <li class="element">
-                    <a class="profileLink" href="http://www.meetup.com/phpbenelux/members/<?php echo $member->member->member_id ?>"
-                       title="<?php echo $member->member->name ?>"><img src="<?php echo $member->member_photo->thumb_link ?>"
-                                                                  alt="<?php echo $member->member->name ?>" width="115" height="115"/></a>
+                    <a class="profileLink" href="http://www.meetup.com/phpbenelux/members/<?php echo $this->escape($member->getMemberId()) ?>"
+                       title="<?php echo $this->escape($member->getName()) ?>"><img src="<?php echo $member->getThumbnail() ?>"
+                                                                  alt="<?php echo $this->escape($member->getName()) ?>" width="115" height="115"/></a>
                 </li>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -56,7 +56,7 @@
     }
     function randomizer()
     {
-        var winner = Math.floor((Math.random() * <?php echo count($this->response) ?>));
+        var winner = Math.floor((Math.random() * <?php echo count($this->collection) ?>));
         jQuery.each(jQuery('li.element').children(), function (index, value) {
             if (index != winner) {
                 var looser = jQuery(value).children()[0];

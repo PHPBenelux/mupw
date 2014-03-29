@@ -13,24 +13,14 @@ class IndexController extends Zend_Controller_Action
         $config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/api.ini');
 
         $eventId = $this->getRequest()->getParam('event', 115919622);
-        $url = sprintf('https://api.meetup.com/2/rsvps?&sign=true&event_id=%d&page=20&key=%s',
-            $eventId, $config->meetup->api->key);
-        $client = new Zend_Http_Client($url);
+        $meetup = new Application_Service_Meetup(
+            $config->meetup->api->key
+        );
 
-        $response = $client->request(Zend_Http_Client::GET);
-
-        $data = json_decode($response->getBody());
-
-        $attendees = array ();
-        foreach ($data->results as $member) {
-            if ('yes' === $member->response) {
-                $attendees[] = $member;
-            }
-        }
-
+        $collection = $meetup->getEventMembers($eventId);
 
         $this->view->assign(array (
-            'response' => $attendees,
+            'collection' => $collection,
             'eventId' => $eventId,
         ));
     }

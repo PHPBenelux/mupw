@@ -1,0 +1,14 @@
+[production]
+
+resources.db.adapter = "Mysqli"
+resources.db.params.host = "hostname"
+resources.db.params.username = "username"
+resources.db.params.password = "password"
+resources.db.params.dbname = "dbname"
+resources.db.isDefaultTableAdapter = true
+
+[staging : production]
+
+[testing : production]
+
+[development : production]

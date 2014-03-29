@@ -14,7 +14,15 @@
       </controllersDirectory>
       <formsDirectory enabled="false"/>
       <layoutsDirectory enabled="false"/>
-      <modelsDirectory/>
+      <modelsDirectory>
+        <modelFile modelName="MeetupMember"/>
+        <dbTableDirectory>
+          <dbTableFile dbTableName="MeetupMember"/>
+        </dbTableDirectory>
+        <modelFile modelName="MeetupMemberMapper"/>
+        <modelFile modelName="Collection"/>
+        <modelFile modelName="ModelInterface"/>
+      </modelsDirectory>
       <modulesDirectory enabled="false"/>
       <servicesDirectory enabled="false"/>
       <viewsDirectory>
