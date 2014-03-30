@@ -1,98 +1,97 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>PHPBenelux Meetup Raffle</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link href='http://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
-    <link href="/styles/style.css" rel="stylesheet" type="text/css" />
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-</head>
 
-<body>
+<h2>Current participants (<span id="participant-count"></span>)</h2>
 
-<div id="wrapper">
-    <h1 id="title">PHPBenelux Meetup Raffle</h1>
+<div class="hidden" id="event_id"><?php echo $this->escape($this->eventId) ?></div>
 
-    <div id="header">
-        <p><img id="hacking" src="/images/hack_laptop.png" width="250" height="" alt="hack"
-                align="right"/>Welcome to the PHPBenelux Meetup Raffle. If you haven't registered on the
-            <a href="https://www.meetup.com/events/<?php echo $this->escape($this->eventId) ?>"
-               title="Registration for the PHPBenelux meetup on meetup.com">event page</a>,
-            you're missing out on winning an awesome prize.</p>
-    </div><!-- end header -->
+<div id="winner">
+    <div style="text-align: center;"><h2>And the winner is...</h2></div>
+    <p><span id="winner-message"></span>
+        <img id="winner-profilePic" src="" alt="" width="64" height="64" style="vertical-align: middle; margin-left: 25px;"/></p>
+    <div class="hidden" id="winner-id"></div>
+    <div class="winner-not-here"><button id="winner-notHere">Not here!</button></div>
+</div>
 
-    <h2>Current participants (<?php echo count($this->collection) ?>)</h2>
+<div id="participants">
+    <ul class="list" id="participant-list">
+    </ul>
+    <div class="clear">&nbsp;</div>
+</div><!-- end participants -->
+<?php $this->inlineScript()->appendScript(<<<EOL
 
-    <div id="winner">
-        <div style="text-align: center;"><h2>And the winner is...</h2></div>
-        <p><span id="message"></span>
-            <img id="profilePic" src="" alt="" width="64" height="64" style="vertical-align: middle; margin-left: 25px;"/></p>
-    </div>
-
-    <div id="participants">
-        <ul class="list">
-            <?php foreach ($this->collection as $member): ?>
-                <?php if ('yes' === $member->getResponse()): ?>
-                <li class="element">
-                    <a class="profileLink" href="http://www.meetup.com/phpbenelux/members/<?php echo $this->escape($member->getMemberId()) ?>"
-                       title="<?php echo $this->escape($member->getName()) ?>"><img src="<?php echo $member->getThumbnail() ?>"
-                                                                  alt="<?php echo $this->escape($member->getName()) ?>" width="115" height="115"/></a>
-                </li>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </ul>
-        <div class="clear">&nbsp;</div>
-    </div><!-- end participants -->
-</div><!-- end wrapper -->
-
-<script type="text/javascript">
-    function hidePictures()
-    {
-        jQuery.each(jQuery('li.element').children(), function (index, value) {
-            var looser = jQuery(value).children()[0];
-            jQuery(looser).html('&nbsp;');
-            jQuery(looser).hide();
-        });
-    }
-    function randomizer()
-    {
-        var winner = Math.floor((Math.random() * <?php echo count($this->collection) ?>));
-        jQuery.each(jQuery('li.element').children(), function (index, value) {
-            if (index != winner) {
-                var looser = jQuery(value).children()[0];
-                jQuery(looser).html('&nbsp;');
-                jQuery(looser).hide();
-            } else {
-                var lucky = jQuery(value).children()[0];
-                jQuery(lucky).show();
-                var string = jQuery(value).attr('title');
-                jQuery('#message').text(string);
-                jQuery('img#profilePic').attr('src', jQuery(lucky).attr('src'));
-                jQuery('img#profilePic').attr('alt', jQuery(lucky).attr('alt'));
-            }
-        });
-    }
-    function pickWinner()
-    {
-        var count = 0;
-        var int = self.setInterval(function() {
-            randomizer();
-            console.log('Running contestant #' + count);
-            if (count == 5) {
-                console.log(this);
-                self.clearInterval(int);
-                jQuery('#winner').show();
-            }
-            count++;
-        }, 1500);
-    }
-    jQuery(document).ready(function () {
-        jQuery('#winner').hide();
-        jQuery('#hacking').click(function () {
-            pickWinner();
+function renderList(eventId) {
+    var parent = $('#participants');
+    var list = $('#participant-list').detach();
+    list.empty();
+    $.getJSON('/index/list/?event=' + eventId, function (data) {
+        $('#participant-count').text(data.length);
+        $.each(data, function (index, value) {
+            list.append(
+                '<li class="element" id="' + value.member_id + '">'
+                + '<a href="http://www.meetup.com/phpbenelux/members/' + value.member_id + '" title="' + value.name + '" rel="nofollow">'
+                + '<img src="' + value.thumb_link + '" width="115" height="115" alt="' + value.name + '"/>'
+                + '</li>');
         });
     });
-</script>
+    parent.append(list);
+}
 
-</body>
-</html>
+
+function randomizer()
+{
+    var winner = Math.floor((Math.random() * 6));
+    $.each($('#participant-list').children(), function (index, value) {
+        if (index != winner) {
+            $(value).css('border-color', 'red');
+        } else {
+            $(value).css('border-color', 'green');
+            $('#winner-message').text($(value).children().attr('title'));
+            $('#winner-profilePic').attr('src', $(value).children().children().attr('src'));
+            $('#winner-id').text($(value).attr('id'));
+        }
+    });
+}
+
+function pickWinner(total) {
+    var count = 0;
+    var int = self.setInterval(function() {
+        randomizer();
+        console.log('Running contestant #' + count);
+        if (count == total) {
+            self.clearInterval(int);
+            $('#winner').show();
+            var eventId = $('#event_id').text();
+            var memberId = $('#winner-id').text();
+            storeWinner(eventId, memberId, 0);
+            renderList(eventId);
+        }
+        count++;
+    }, 1500);
+}
+
+function storeWinner(eventId, memberId, notHere) {
+    $.post('/index/update', {
+        eventId: eventId,
+        memberId: memberId,
+        winner: 1,
+        notHere: notHere
+    });
+}
+
+$(document).ready(function() {
+    $('#winner').hide();
+    var eventId = $('#event_id').text();
+    renderList(eventId);
+    $('#hacking').click(function() {
+        pickWinner(3);
+    });
+    $('#winner-notHere').click(function() {
+        var eventId = $('#event_id').text();
+        var memberId = $('#winner-id').text();
+        storeWinner(eventId, memberId, 1);
+        $('#winner').hide();
+        pickWinner(3);
+    });
+});
+
+EOL
+) ?>

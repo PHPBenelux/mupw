@@ -41,12 +41,19 @@ ul.list {
 }
 
 ul.list li.element {
-    width: 100px;
+    width: 115px;
+    height: 115px;
     float: left;
     margin: 10px;
+    border: 3px solid black;
 }
 
 .clear {
     font-size: 0;
     clear: both;
+}
+
+.hidden {
+    display: none;
+    visibility: hidden;
 }

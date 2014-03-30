@@ -1,0 +1,35 @@
+<?php echo $this->docType() ?>
+<html xml:lang="en" lang="en">
+<head>
+    <?php
+    echo $this->headMeta() . PHP_EOL;
+    echo $this->headTitle() . PHP_EOL;
+    echo $this->headLink() . PHP_EOL;
+    echo $this->headStyle() . PHP_EOL;
+    echo $this->headScript() . PHP_EOL;
+    ?>
+</head>
+
+<body>
+<div id="wrapper">
+    <h1 id="title">PHPBenelux Meetup Raffle</h1>
+
+    <div id="header">
+        <p><img id="hacking" src="/images/hack_laptop.png" width="250" height="" alt="hack"
+                align="right"/>Welcome to the PHPBenelux Meetup Raffle. If you haven't registered on the
+            <a href="https://www.meetup.com/events/<?php echo $this->escape($this->eventId) ?>"
+               title="Registration for the PHPBenelux meetup on meetup.com">event page</a>,
+            you're missing out on winning an awesome prize.</p>
+    </div><!-- end header -->
+
+    <div id="middle">
+        <?php echo $this->layout()->content; ?>
+    </div>
+
+    <div id="footer"></div>
+
+</div><!-- end wrapper -->
+
+<?php echo $this->inlineScript(); ?>
+</body>
+</html>

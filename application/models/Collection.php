@@ -97,5 +97,19 @@ class Application_Model_Collection implements Countable, SeekableIterator
     {
         $this->_position = $position;
     }
+
+    /**
+     * Convert this collection into an array map
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $collection = array ();
+        foreach ($this->_stack as $entity) {
+            $collection[] = $entity->toArray();
+        }
+        return $collection;
+    }
 }
 

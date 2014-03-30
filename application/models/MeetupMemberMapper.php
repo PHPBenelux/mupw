@@ -67,7 +67,10 @@ class Application_Model_MeetupMemberMapper
         try {
             $this->getDbTable()->insert($model->toArray());
         } catch (Zend_Db_Exception $exception) {
-            throw $exception;
+            $this->getDbTable()->update($model->toArray(), array (
+                'event_id = ?' => $model->getEventId(),
+                'member_id = ?' => $model->getMemberId()
+            ));
         }
     }
 }

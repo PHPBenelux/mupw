@@ -5,6 +5,10 @@ class Application_Service_Meetup
     const API_MEETUP_URI = 'https://api.meetup.com/2';
 
     /**
+     * @var Application_Model_MeetupMemberMapper
+     */
+    protected $_mapper;
+    /**
      * @var Zend_Http_Client The HTTP Client to make requests
      */
     protected $_httpClient;
@@ -74,6 +78,31 @@ class Application_Service_Meetup
     }
 
     /**
+     * Sets the mapper for this service
+     *
+     * @param Application_Model_MeetupMemberMapper $mapper
+     * @return Application_Service_Meetup
+     */
+    public function setMapper(Application_Model_MeetupMemberMapper $mapper)
+    {
+        $this->_mapper = $mapper;
+        return $this;
+    }
+
+    /**
+     * Retrieves the mapper class for this service
+     *
+     * @return Application_Model_MeetupMemberMapper
+     */
+    public function getMapper()
+    {
+        if (null === $this->_mapper) {
+            $this->setMapper(new Application_Model_MeetupMemberMapper());
+        }
+        return $this->_mapper;
+    }
+
+    /**
      * Retrieve all attendees at an event
      *
      * @param $eventId
@@ -97,11 +126,13 @@ class Application_Service_Meetup
      */
     public function retrieveEventMembersFromDatabase($eventId)
     {
-        $mapper = new Application_Model_MeetupMemberMapper();
         $collection = new Application_Model_Collection();
-        $mapper->fetchAll(
+        $this->getMapper()->fetchAll(
             $collection,
-            array ('event_id = ?' => $eventId),
+            array (
+                'event_id = ?' => $eventId,
+                'winner = 0',
+            ),
             array ('mtime DESC')
         );
         return $collection;
@@ -151,9 +182,23 @@ class Application_Service_Meetup
      */
     public function storeAttendees(Application_Model_Collection $attendees)
     {
-        $mapper = new Application_Model_MeetupMemberMapper();
         foreach ($attendees as $member) {
-            $mapper->save($member);
+            $this->getMapper()->save($member);
         }
+    }
+
+    public function updateWinner($eventId, $memberId, $winner, $notHere)
+    {
+        $meetupMember = new Application_Model_MeetupMember();
+        $this->getMapper()->fetchRow(
+            $meetupMember,
+            array (
+                'event_id = ?' => $eventId,
+                'member_id = ?' => $memberId,
+            )
+        );
+        $meetupMember->setWinner($winner)
+            ->setNotHere($notHere);
+        $this->getMapper()->save($meetupMember);
     }
 }
